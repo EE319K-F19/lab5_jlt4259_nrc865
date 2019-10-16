@@ -22,113 +22,168 @@ void EnableInterrupts(void);
 // logic analyzer on the real board
 #define PA4       (*((volatile unsigned long *)0x40004040))
 #define PE50      (*((volatile unsigned long *)0x400240FC))
+	
+struct State{
+	uint32_t Out;
+	uint32_t Time;
+	const struct State *Next[4];
+};
+typedef const struct State STyp;
+
+// Naming convention: "Wipe" states mean the LED is off. "Spray" means the LED is on 
+// (note that while spraying the LED still should alternate between on and off)
+// The number after wipe/spray indicates the output for the motor.
+// The 'C' is explained below.
+
+#define Wipe1C1		&FSM[0]	// There are 4 cycles (C) the wiper goes through
+#define Spray1C1	&FSM[1] // Cycle 1: 1,2,4,8,16
+#define Wipe2C1		&FSM[2]
+#define Spray2C1	&FSM[3]
+#define Wipe4C1		&FSM[4]
+#define Spray4C1	&FSM[5]
+#define Wipe8C1		&FSM[6]
+#define Spray8C1	&FSM[7]
+#define Wipe16C1	&FSM[8]
+#define Spray16C1	&FSM[9]
+
+#define Wipe1C2		&FSM[10] // Cycle 2: 1,2,4,8,16 again
+#define Spray1C2	&FSM[11]
+#define Wipe2C2		&FSM[12]
+#define Spray2C2	&FSM[13]
+#define Wipe4C2		&FSM[14]
+#define Spray4C2	&FSM[15]
+#define Wipe8C2		&FSM[16]
+#define Spray8C2	&FSM[17]
+#define Wipe16C2	&FSM[18]
+#define Spray16C2	&FSM[19]
+
+#define Wipe8C3   &FSM[20] // Cycle 3: 8,4,2,1
+#define Spray8C3	&FSM[21]
+#define Wipe4C3		&FSM[22]
+#define Spray4C3	&FSM[23]
+#define Wipe2C3		&FSM[24]
+#define Spray2C3	&FSM[25]
+#define Wipe1C3		&FSM[26]
+#define Spray1C3	&FSM[27]
+
+#define Wipe16C4	&FSM[28] // Cycle 4: 16,8,4,2,1
+#define Spray16C4	&FSM[29]
+#define Wipe8C4		&FSM[30]
+#define Spray8C4	&FSM[31]
+#define Wipe4C4		&FSM[32]
+#define Spray4C4	&FSM[33]
+#define Wipe2C4		&FSM[34]
+#define Spray2C4	&FSM[35]
+#define Wipe1C4		&FSM[36]
+#define Spray1C4	&FSM[37]
+
+STyp FSM[38] = {
+	{1, 5, {Wipe1C1, Wipe2C1, Spray2C1, Spray2C1}},
+	{1 + 32, 5, {Wipe2C1, Wipe2C1, Wipe2C1, Spray2C1}},
+	
+	{2, 5, {Wipe4C1, Wipe4C1, Spray4C1, Spray4C1}},
+	{2 + 32, 5, {Wipe4C1, Wipe4C1, Wipe4C1, Spray4C1}},
+	
+	{4, 5, {Wipe8C1, Wipe8C1, Spray8C1, Spray8C1}},
+	{4 + 32, 5, {Wipe8C1, Wipe8C1, Wipe8C1, Spray8C1}},
+	
+	{8, 5, {Wipe16C1, Wipe16C1, Spray16C1, Spray16C1}},
+	{8 + 32, 5, {Wipe16C1, Wipe16C1, Wipe16C1, Spray16C1}},
+	
+	{16, 5, {Wipe1C2, Wipe1C2, Spray1C2, Spray1C2}},
+	{16 + 32, 5, {Wipe1C2, Wipe1C2, Wipe1C2, Spray1C2}},
+	
+	{1, 5, {Wipe2C2, Wipe2C2, Spray2C2, Spray2C2}},
+	{1 + 32, 5, {Wipe2C2, Wipe2C2, Wipe2C2, Spray2C2}},
+	
+	{2, 5, {Wipe4C2, Wipe4C2, Spray4C2, Spray4C2}},
+	{2 + 32, 5, {Wipe4C2, Wipe4C2, Wipe4C2, Spray4C2}},
+	
+	{4, 5, {Wipe8C2, Wipe8C2, Spray8C2, Spray8C2}},
+	{4 + 32, 5, {Wipe8C2, Wipe8C2, Wipe8C2, Spray8C2}},
+	
+	{8, 5, {Wipe16C2, Wipe16C2, Spray16C2, Spray16C2}},
+	{8 + 32, 5, {Wipe16C2, Wipe16C2, Wipe16C2, Spray16C2}},
+	
+	{16, 5, {Wipe8C3, Wipe8C3, Spray8C3, Spray8C3}},
+	{16 + 32, 5, {Wipe8C3, Wipe8C3, Wipe8C3, Spray8C3}},
+	
+	{8, 5, {Wipe4C3, Wipe4C3, Spray4C3, Spray4C3}},
+	{8 + 32, 5, {Wipe4C3, Wipe4C3, Wipe4C3, Spray4C3}},
+	
+	{4, 5, {Wipe2C3, Wipe2C3, Spray2C3, Spray2C3}},
+	{4 + 32, 5, {Wipe2C3, Wipe2C3, Wipe2C3, Spray2C3}},
+	
+	{2, 5, {Wipe1C3, Wipe1C3, Spray1C3, Spray1C3}},
+	{2 + 32, 5, {Wipe1C3, Wipe1C3, Wipe1C3, Spray1C3}},
+	
+	{1, 5, {Wipe16C4, Wipe16C4, Spray16C4, Spray16C4}},
+	{1 + 32, 5, {Wipe16C4, Wipe16C4, Wipe16C4, Spray16C4}},
+	
+	{16, 5, {Wipe8C4, Wipe8C4, Spray8C4, Spray8C4}},
+	{16 + 32, 5, {Wipe8C4, Wipe8C4, Wipe8C4, Spray8C4}},
+	
+	{8, 5, {Wipe4C4, Wipe4C4, Spray4C4, Spray4C4}},
+	{8 + 32, 5, {Wipe4C4, Wipe4C4, Wipe4C4, Spray4C4}},
+	
+	{4, 5, {Wipe2C4, Wipe2C4, Spray2C4, Spray2C4}},
+	{4 + 32, 5, {Wipe2C4, Wipe2C4, Wipe2C4, Spray2C4}},
+	
+	{2, 5, {Wipe1C4, Wipe1C4, Spray1C4, Spray1C4}},
+	{2 + 32, 5, {Wipe1C4, Wipe1C4, Wipe1C4, Spray1C4}},
+	
+	{1, 5, {Wipe1C1, Wipe1C1, Spray1C1, Spray1C1}},
+	{1 + 32, 5, {Wipe1C1, Wipe1C1, Wipe1C1, Spray1C1}}
+};
+
+
+const struct State *Pt;
+uint32_t input;
+
 void SendDataToLogicAnalyzer(void){
   UART0_DR_R = 0x80|(PA4<<2)|PE50;
 }
 
-struct State {
-	uint8_t Next[4];; // depends on 2-bit input
-	uint8_t LED;
-	uint8_t Motor;
-	uint32_t Dwell;
-};
-typedef const struct State STyp;
-#define NoButton   0
-#define Swipe1 1
-#define Swipe2 2
-#define Swipe3 3
-#define Swipe4 4
-#define Swipe5 5
-#define Swipe6 6
-#define Swipe7 7	
-#define Swipe8 8
-#define Swipe9 9
-#define Swipe10 10
-#define Swipe11 11
-#define Swipe12 12
-#define Swipe13 13
-#define Swipe14 14
-#define Swipe15 15
-#define Swipe16 16
-#define Swipe17 17
-#define Swipe18 18
-#define Swipe19 19
-#define Wash1   20
-#define Wash2   21
-#define Wash3   22
-#define Wash4   23
-#define Wash5   24
-#define Wash6   25
-#define Wash7   26
-#define Wash8   27
-#define Wash9   28
-#define Wash10   29
-#define Wash11   30
-#define Wash12   31
-#define Wash13   32
-#define Wash14   33
-#define Wash15   34
-#define Wash16   35
-#define Wash17   36
-#define Wash18   37
-#define Wash19   38
-
-STyp FSM[39]={
-{/*NoButton*/ {NoButton,Swipe1,Wash1,Wash1},0,1,4000},
-{/*Swipe1*/ {NoButton,Swipe2,Wash2,Wash2},0,1,4000},
-{/*Swipe2*/ {Swipe1,Swipe3,Wash3,Wash3},0,2,4000},
-{/*Swipe3*/ {Swipe2,Swipe4,Wash4,Wash4},0,4,4000},
-{/*Swipe4*/ {Swipe3,Swipe5,Wash5,Wash5},0,8,4000},
-{/*Swipe5*/ {Swipe4,Swipe6,Wash6,Wash6},0,16,4000},
-{/*Swipe6*/ {Swipe5,Swipe7,Wash7,Wash7},0,1,4000},
-{/*Swipe7*/ {Swipe6,Swipe8,Wash8,Wash8},0,2,4000},
-{/*Swipe8*/ {Swipe7,Swipe9,Wash9,Wash9},0,4,4000},
-{/*Swipe9*/ {Swipe8,Swipe10,Wash10,Wash10},0,8,4000},
-{/*Swipe10*/ {Swipe9,Swipe11,Wash11,Wash11},0,16,4000},
-{/*Swipe11*/ {Swipe10,Swipe12,Wash12,Wash12},0,8,4000},
-{/*Swipe12*/ {Swipe11,Swipe13,Wash13,Wash13},0,4,4000},
-{/*Swipe13*/ {Swipe12,Swipe14,Wash14,Wash14},0,2,4000},
-{/*Swipe14*/ {Swipe13,Swipe15,Wash15,Wash15},0,1,4000},
-{/*Swipe15*/ {Swipe14,Swipe16,Wash16,Wash16},0,16,4000},
-{/*Swipe16*/ {Swipe15,Swipe17,Wash17,Wash17},0,8,4000},
-{/*Swipe17*/ {Swipe16,Swipe18,Wash18,Wash18},0,4,4000},
-{/*Swipe18*/ {Swipe17,Swipe19,Wash19,Wash19},0,2,4000},
-{/*Swipe19*/ {Swipe18,Swipe1,Wash1,Wash1},0,1,4000},
-{/*Wash1*/ {NoButton,Swipe2,Wash2,Wash2},1,1,4000},
-{/*Wash2*/ {Swipe1,Swipe3,Wash3,Wash3},1,2,4000},
-{/*Wash3*/ {Swipe2,Swipe4,Wash4,Wash4},1,4,4000},
-{/*Wash4*/ {Swipe3,Swipe5,Wash5,Wash5},1,8,4000},
-{/*Wash5*/ {Swipe4,Swipe6,Wash6,Wash6},1,16,4000},
-{/*Wash6*/ {Swipe5,Swipe7,Wash7,Wash7},1,1,4000},
-{/*Wash7*/ {Swipe6,Swipe8,Wash8,Wash8},1,2,4000},
-{/*Wash8*/ {Swipe7,Swipe9,Wash9,Wash9},1,4,4000},
-{/*Wash9*/ {Swipe8,Swipe10,Wash10,Wash10},1,8,4000},
-{/*Wash10*/ {Swipe9,Swipe11,Wash11,Wash11},1,16,4000},
-{/*Wash11*/ {Swipe10,Swipe12,Wash12,Wash12},1,8,4000},
-{/*Wash12*/ {Swipe11,Swipe13,Wash13,Wash13},1,4,4000},
-{/*Wash13*/ {Swipe12,Swipe14,Wash14,Wash14},1,2,4000},
-{/*Wash14*/ {Swipe13,Swipe15,Wash15,Wash15},1,1,4000},
-{/*Wash15*/ {Swipe14,Swipe16,Wash16,Wash16},1,16,4000},
-{/*Wash16*/ {Swipe15,Swipe17,Wash17,Wash17},1,8,4000},
-{/*Wash17*/ {Swipe16,Swipe18,Wash18,Wash18},1,4,4000},
-{/*Wash18*/ {Swipe17,Swipe19,Wash19,Wash19},1,2,4000},
-{/*Wash19*/ {Swipe18,Swipe1,Wash1,Wash1},1,1,4000},
-
-};
 int main(void){ 
   TExaS_Init(&SendDataToLogicAnalyzer);    // activate logic analyzer and set system clock to 80 MHz
   SysTick_Init();   
 // you initialize your system here
-	uint8_t cs;
-	uint8_t input;
-	cs=NoButton;
-  EnableInterrupts();   
+//  PA5 is Wash input  (1 means pressed, 0 means not pressed)
+//  PA4 is Wiper input  (1 means pressed, 0 means not pressed)
+//  PE5 is Water pump output (toggle means washing)
+//  PE4-0 are stepper motor outputs 
+//  PF1 PF2 or PF3 control the LED on Launchpad used as a heartbeat
+//  PB6 is LED output (1 activates external LED on protoboard)
+	
+	SYSCTL_RCGCGPIO_R |= 0x31;
+	// in line assembly - NOP twice
+	__nop();
+	__nop();
+	
+	// set PA4,PA5 as inputs
+	// PA4: Wiper
+	// PA5: Spray
+	GPIO_PORTA_DIR_R &= ~0x30;
+	GPIO_PORTA_DEN_R |= 0x30;
+	
+	// set PE5 as water pump LED output
+	// set PE4-0 as outputs (stepper motor)
+	GPIO_PORTE_DIR_R |= 0x3F;
+	GPIO_PORTE_DEN_R |= 0x3F;
+
+  EnableInterrupts();
+
+	// set the state pointer to the starting state
+	Pt = Wipe1C1;
+	
   while(1){
 // output
+		PE50 = Pt->Out;
 // wait
+		SysTick_Wait10ms(Pt->Time);
 // input
+		input = (GPIO_PORTA_DATA_R >> 4);
 // next		
+		Pt = Pt->Next[input];
   }
 }
-
-
