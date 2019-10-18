@@ -34,46 +34,44 @@ typedef const struct State STyp;
 // Wash will wipe and flash the LED 
 
 #define Wipe1C1		&FSM[0]	
-#define Wash1C1	&FSM[1]   // stepper motor outputs 1,2,4,8,16
+#define Wash1C1		&FSM[1]   // stepper motor outputs 1,2,4,8,16
 #define Wipe2C1		&FSM[2]
-#define Wash2C1	&FSM[3]
+#define Wash2C1		&FSM[3]
 #define Wipe4C1		&FSM[4]
-#define Wash4C1	&FSM[5]
+#define Wash4C1		&FSM[5]
 #define Wipe8C1		&FSM[6]
-#define Wash8C1	&FSM[7]
+#define Wash8C1		&FSM[7]
 #define Wipe16C1	&FSM[8]
 #define Wash16C1	&FSM[9]
-
 #define Wipe1C2		&FSM[10] // stepper motor outputs 1,2,4,8,16 
-#define Wash1C2	&FSM[11]
+#define Wash1C2		&FSM[11]
 #define Wipe2C2		&FSM[12]
-#define Wash2C2	&FSM[13]
+#define Wash2C2		&FSM[13]
 #define Wipe4C2		&FSM[14]
-#define Wash4C2	&FSM[15]
+#define Wash4C2		&FSM[15]
 #define Wipe8C2		&FSM[16]
-#define Wash8C2	&FSM[17]
+#define Wash8C2		&FSM[17]
 #define Wipe16C2	&FSM[18]
 #define Wash16C2	&FSM[19]
-
 #define Wipe8C3   &FSM[20] // stepper motor outputs 8,4,2,1
-#define Wash8C3	&FSM[21]
+#define Wash8C3		&FSM[21]
 #define Wipe4C3		&FSM[22]
-#define Wash4C3	&FSM[23]
+#define Wash4C3		&FSM[23]
 #define Wipe2C3		&FSM[24]
-#define Wash2C3	&FSM[25]
+#define Wash2C3		&FSM[25]
 #define Wipe1C3		&FSM[26]
-#define Wash1C3	&FSM[27]
+#define Wash1C3		&FSM[27]
 
 #define Wipe16C4	&FSM[28] // stepper motor outputs 16,8,4,2,1
 #define Wash16C4	&FSM[29]
 #define Wipe8C4		&FSM[30]
-#define Wash8C4	&FSM[31]
+#define Wash8C4		&FSM[31]
 #define Wipe4C4		&FSM[32]
-#define Wash4C4	&FSM[33]
+#define Wash4C4		&FSM[33]
 #define Wipe2C4		&FSM[34]
-#define Wash2C4	&FSM[35]
+#define Wash2C4		&FSM[35]
 #define Wipe1C4		&FSM[36]
-#define Wash1C4	&FSM[37]
+#define Wash1C4		&FSM[37]
 
 // added 32 to the Wash states in order to toggle the water LED, it hits PE5
 
@@ -88,7 +86,6 @@ STyp FSM[38] = {
 	{8 + 32, 5, {Wipe16C1, Wipe16C1, Wipe16C1, Wash16C1}},
 	{16, 5, {Wipe1C2, Wipe1C2, Wash1C2, Wash1C2}},
 	{16 + 32, 5, {Wipe1C2, Wipe1C2, Wipe1C2, Wash1C2}},
-	
 	{1, 5, {Wipe2C2, Wipe2C2, Wash2C2, Wash2C2}},  //cycle 2 for wash and wipe 
 	{1 + 32, 5, {Wipe2C2, Wipe2C2, Wipe2C2, Wash2C2}},
 	{2, 5, {Wipe4C2, Wipe4C2, Wash4C2, Wash4C2}},
@@ -99,7 +96,6 @@ STyp FSM[38] = {
 	{8 + 32, 5, {Wipe16C2, Wipe16C2, Wipe16C2, Wash16C2}},
 	{16, 5, {Wipe8C3, Wipe8C3, Wash8C3, Wash8C3}},
 	{16 + 32, 5, {Wipe8C3, Wipe8C3, Wipe8C3, Wash8C3}},
-	
 	{8, 5, {Wipe4C3, Wipe4C3, Wash4C3, Wash4C3}}, //cycle 3 for wash and wipe
 	{8 + 32, 5, {Wipe4C3, Wipe4C3, Wipe4C3, Wash4C3}},
 	{4, 5, {Wipe2C3, Wipe2C3, Wash2C3, Wash2C3}},
@@ -110,8 +106,6 @@ STyp FSM[38] = {
 	{1 + 32, 5, {Wipe16C4, Wipe16C4, Wipe16C4, Wash16C4}},
 	{16, 5, {Wipe8C4, Wipe8C4, Wash8C4, Wash8C4}},
 	{16 + 32, 5, {Wipe8C4, Wipe8C4, Wipe8C4, Wash8C4}},
-	
-	
 	{8, 5, {Wipe4C4, Wipe4C4, Wash4C4, Wash4C4}}, //cycle 4 for wash and wipe
 	{8 + 32, 5, {Wipe4C4, Wipe4C4, Wipe4C4, Wash4C4}},
 	{4, 5, {Wipe2C4, Wipe2C4, Wash2C4, Wash2C4}},
@@ -123,7 +117,7 @@ STyp FSM[38] = {
 };
 
 
-const struct State *Pt;
+const struct State *Pointer;
 uint32_t input;
 
 void SendDataToLogicAnalyzer(void){
@@ -141,34 +135,20 @@ int main(void){
 //  PF1 PF2 or PF3 control the LED on Launchpad used as a heartbeat
 //  PB6 is LED output (1 activates external LED on protoboard)
 	
-	SYSCTL_RCGCGPIO_R |= 0x31;
-	// wait for clock to set up 
+	SYSCTL_RCGCGPIO_R |= 0x11; // clocks for ports A and E
+	__nop(); // wait for clock to set up 
 	__nop();
-	__nop();
-	
-	// PA4: Wiper
-	// PA5: Wash
-	GPIO_PORTA_DIR_R &= ~0x30;
+	GPIO_PORTA_DIR_R &= ~0x30; // PA4 as wipe, PA5 as wash
 	GPIO_PORTA_DEN_R |= 0x30;
-	
-	// set PE5 as LED output
-	// PE4-0 is the stepper motor
-	GPIO_PORTE_DIR_R |= 0x3F;
+	GPIO_PORTE_DIR_R |= 0x3F;	// set PE5 as LED output, PE4-0 is the stepper motor
 	GPIO_PORTE_DEN_R |= 0x3F;
-
   EnableInterrupts();
-
-	// pointer to initial state
-	Pt = Wipe1C1;
+	Pointer = Wipe1C1; // pointer to initial state
 	
   while(1){
-// output
-	PE50 = Pt->Out;
-// wait
-	SysTick_Wait10ms(Pt->Time); //wait for 50 ms
-// input
-	input = (GPIO_PORTA_DATA_R >> 4); //shift PA5 and PA4 into bits 1 and 0, respectively 
-// next		
-	Pt = Pt->Next[input];
+		PE50 = Pointer->Out; // output
+		SysTick_Wait10ms(Pointer->Time); //wait for 50 ms
+		input = (GPIO_PORTA_DATA_R >> 4); //shift PA5 and PA4 into bits 1 and 0, respectively 		
+		Pointer = Pointer->Next[input]; // next
   }
 }
